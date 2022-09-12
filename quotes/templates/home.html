@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    {% if ticker %}
+        {{ticker}}
+    {% endif %}
+<br/>
+
+<form class="form-inline my-2 my-lg-0 " action="{% url 'home' %}" method="POST">
+          {% csrf_token %}
+
+            <input class="form-control " type="search" placeholder="Get a current Quote " aria-label="Quote Search" name="ticker">
+            <button class="btn btn-outline-danger btn-sm ml-1 mt-1" type="submit"> SEARCH </button>
+            <br/>
+            <button class="btn btn-primary btn-sm ml-1 mt-1" type="submit" formmethod="GET" >Reset View</button>
+
+</form>
+
+
+
+<h3 class="bg-secondary" style="font-size: 15px;width:10%; margin-left:80%; border:solid">Status of your request : {{request_status}}</h3>
+<!--the == sign must have spaces before and after-->
+    {% if api %}
+        {% if api == 'BigError' %}
+            <p style="color:orange">There is a problem in your request</p>
+        {% else %}
+            <h1>{{api.companyName}}</h1><br>
+            Price: ${{api.latestPrice}} <br>
+            Previous Close: {{api.previousClose}} <br>
+            Market Cap: {{api.marketCap}} <br>
+            YTD Change: {{api.ytdChange}} <br>
+            week52High: {{api.week52High}} <br>
+            week52Low: {{api.week52Low}} <br>
+
+        {% endif%}
+    {% endif%}
+
+<br/>
+<br/>
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div id="tradingview_8936c"></div>
+    <div class="tradingview-widget-copyright" ><a href="https://www.tradingview.com/symbols/VANTAGE-SP500/" rel="noopener" target="_blank"><span class="blue-text">{{stock}} Chart</span></a> <p style="visibility:hidden">by TradingView</p></div><script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+  new TradingView.widget(
+  {
+  "autosize": false,
+  "symbol": "{{stock}}",
+  "timezone": "Etc/UTC",
+  "theme": "dark",
+  "style": "1",
+  "locale": "en",
+  "toolbar_bg": "#f1f3f6",
+  "enable_publishing": true,
+  "range": "YTD",
+  "allow_symbol_change": true,
+  "container_id": "tradingview_8936c"
+}
+  );
+  </script>
+</div>
+<!-- TradingView Widget END -->
+{% endblock content%}

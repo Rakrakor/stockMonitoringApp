@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <h1>Add Stock ... </h1>
+        <form class="form-inline my-2 my-lg-0" action="{% url 'add_stock' %}" method="POST">
+          {% csrf_token %}
+          <input class="form-control mr-sm-2" type="search" placeholder="add stock " aria-label="add stock" name="ticker">
+          <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">ADD New Stock</button>
+        </form>
+
+<!-- ##############-->
+<br/>
+<br/>
+
+
+
+<table class="table table-striped table-bordered table-hover">
+  <thead class="thead-dark">
+    <tr>
+        <th scope="col">Company Name</th>
+        <th scope="col">Stock Price</th>
+        <th scope="col">Previous Close</th>
+        <th scope="col">Market Cap</th>
+        <th scope="col">YTD Change</th>
+        <th scope="col">52Wk High</th>
+        <th scope="col">52Wk Low</th>
+        <th scope="col">Delete Stock</th>
+
+    </tr>
+  </thead>
+  <tbody>
+  {% if output %}
+  {% for item in output %}   <!-- item is a tuple -->
+    <tr>
+      <th scope="row">{{item.1.companyName}}</th>  <!-- to get the index we use a dot 'item.INDEX -->
+        <td>$ {{item.1.latestPrice}}</td>
+        <td>$ {{item.1.previousClose}}</td>
+        <td>$ {{item.1.marketCap}}</td>
+        <td>{{item.1.ytdChange}} %</td>
+        <td>$ {{item.1.week52High}}</td>
+        <td>$ {{item.1.week52Low}} </td>
+        <td><a href="{% url 'delete' item.0 %}">Delete Stock</a></td>
+    </tr>
+
+  {% endfor %}
+  {% endif %}
+  </tbody>
+</table>
+
+
+
+{% endblock content%}
+
+
+
