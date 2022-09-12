@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from os import strerror
 
 
-def home(request):
+def home(request, stock_id=None):
 
     import requests
     import json
@@ -23,7 +23,11 @@ def home(request):
             print(e)
         return render(request, 'home.html', {'api': api, 'stock':ticker, 'request_status': api_request.status_code})
     else:
-        return render(request, 'home.html', {'ticker':'⬇️ Search a quote ⬇️', 'stock':'VANTAGE:SP500'})
+        if stock_id is None:
+            stock = 'VANTAGE:SP500'
+        else:
+            stock = stock_id
+        return render(request, 'home.html', {'ticker':'⬇️ Search a quote ⬇️', 'stock':stock})
 
     #api_request = requests.get("https://cloud.iexapis.com/stable/stock/appl/quote?token=pk_f3cf7858163e4525b467452e90fd8df2")
     #api_request = requests.get("https://cloud.iexapis.com/stable/stock/aapl/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
@@ -45,8 +49,17 @@ def add_stock(request):
         form = StockForm(request.POST or None)
 
         if form.is_valid():
-            form.save()
-            messages.success(request,("Stock has been succesfully saved !"))
+            try:
+                ticker_item = request.POST['ticker']
+                api_request = requests.get(
+                    "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
+                api = json.loads(api_request.content)
+                form.save()
+                messages.success(request, ("Stock has been succesfully saved !"))
+            except Exception as e:
+                messages.warning(request, ("This ticker does not exist"))
+                print(e)
+
             return redirect('add_stock')
 
     else:
