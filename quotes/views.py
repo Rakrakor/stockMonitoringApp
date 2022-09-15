@@ -5,19 +5,26 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from os import strerror
 
+import requests
+import json
+
+apiGetRequestVAR ={"api_request":0, "apiJSON":1}
+
+def APIGetRequest(ticker):
+    api_request = requests.get(
+        "https://cloud.iexapis.com/stable/stock/" + str(ticker) + "/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
+    api = json.loads(api_request.content)
+    return (api_request, api)
 
 def home(request, stock_id=None):
-
-    import requests
-    import json
 
     if request.method == 'POST':
         #Ticker is the variable name given to the input field of the search bar in the base.html
         ticker = request.POST['ticker']
         try:
-            api_request = requests.get(
-                "https://cloud.iexapis.com/stable/stock/"+ticker+"/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
-            api = json.loads(api_request.content)
+            APIGetResult = APIGetRequest(ticker)
+            api_request = APIGetResult[apiGetRequestVAR["api_request"]]
+            api = APIGetResult[apiGetRequestVAR["apiJSON"]]
         except Exception as e:
             api = "BigError"
             print(e)
@@ -28,10 +35,6 @@ def home(request, stock_id=None):
         else:
             stock = stock_id
         return render(request, 'home.html', {'ticker':'⬇️ Search a quote ⬇️', 'stock':stock})
-
-    #api_request = requests.get("https://cloud.iexapis.com/stable/stock/appl/quote?token=pk_f3cf7858163e4525b467452e90fd8df2")
-    #api_request = requests.get("https://cloud.iexapis.com/stable/stock/aapl/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
-    #api_request = requests.get("https://cloud.iexapis.com/v1/sql-query/STOCKSAPP?token=sk_c4acbb380f424241b8e01589bf9edcfc&sqlQuery=SELECT%20*%20FROM%20CORE.%60COMPANY%60%20LIMIT%2010")
 
     return render(request, 'home.html', {'api':api})
 
@@ -51,9 +54,7 @@ def add_stock(request):
         if form.is_valid():
             try:
                 ticker_item = request.POST['ticker']
-                api_request = requests.get(
-                    "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
-                api = json.loads(api_request.content)
+                APIGetResult = APIGetRequest(ticker_item) #function will propagates exception if not able to retrieve api result
                 form.save()
                 messages.success(request, ("Stock has been succesfully saved !"))
             except Exception as e:
@@ -68,9 +69,9 @@ def add_stock(request):
         output=[]
         for ticker_item in tickerInDb:
             try:
-                api_request = requests.get(
-                    "https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=sk_c4acbb380f424241b8e01589bf9edcfc")
-                api = json.loads(api_request.content)
+
+                APIGetResult = APIGetRequest(ticker_item)
+                api = APIGetResult[apiGetRequestVAR["apiJSON"]]
                 output.append((ticker_item.id, api))
             except Exception as e:
                 api = "BigError"
@@ -84,3 +85,12 @@ def delete(request, stock_id):
     item.delete()
     messages.success(request, ("Stock successfully deleted"))
     return redirect (add_stock)
+
+
+from rest_framework import viewsets
+from .models import Stock
+from .serializers import StockSerializer
+
+class StockView(viewsets.ModelViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer

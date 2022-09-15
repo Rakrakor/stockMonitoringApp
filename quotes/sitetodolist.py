@@ -34,6 +34,23 @@
 #TODO 30) in the view.py Create a new function delete()
 #TODO 31) from the add_stock.html create a link to call the URL path delete with parameter < ID >
 
+# CREATE API
+#TODO: 32-Create a SERIALIZER ( see www.django-rest-framework.org)
+#TODO: 33-  (it will transform the data into JSON )
+#TODO: 34-  Create a new file: serializers.py
+#TODO: 35-  import the serializers package , AND the MODELS we want to serialize
+#TODO: 36-  define a class that extends ModelSerializer
+#TODO: 37-  Define a sub class Meta: with paramaters Models, fields
+
+#TODO: 38-Create VIEW: create a CLASS (not a fonction) in the views.py, that handles the dataset <=> the serializer Class
+#TODO: 39-  the class extends 'viewsets.ModelViewSet',  from rest_framework import viewsets
+#TODO: 40-  the 2 new parameters are: queryset=Stock.objects.all() and serializer_class = StockSerializer
+
+#TODO: 41-Create the URL:
+#TODO: 42-  import and use router = routers.DefaultRouter()
+#TODO: 43-  register the 2 parameters: 'desired URI', StockView function from views.py
+#TODO: 44-  in the path, include the router : path('', include(router.urls)
+
 
 
 
